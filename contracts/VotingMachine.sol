@@ -4,8 +4,21 @@ pragma solidity 0.6.12;
 import "./VotingHelper.sol";
 
 contract VotingMachine is VotingHelper {
-    mapping(uint256 => address) public newCandidate;
-    mapping(uint8 => address) public voteForCandidate;
+    struct Candidate {
+        string name;
+        uint256 id;
+        uint256 voteCount;
+    }
+
+    struct Election {
+        string name;
+        uint256 id;
+        uint256 registrationDeadline;
+        uint256 electionDeadline;
+        Candidate[] candidates;
+    }
+
+    Election[] public elections;
     uint256 voteCount = 1;
     // An address type variable is used to store ethereum accounts.
     address public owner;
@@ -19,8 +32,13 @@ contract VotingMachine is VotingHelper {
         owner = msg.sender;
     }
 
-    //Anyone can start an election with: (registration period, voting period, ending time)
-    function registerNewVotingPeriod() public {}
+    //Anyone can start an election with: (registration period, voting period)
+    function registerNewElection(uint256 registrationDays, uint256 votingDays)
+        public
+    {
+        //now + registrationDays
+        //now + registrationDays + votingDays
+    }
 
     //Anyone can sign up as a candidate during the registration period
     function registerNewCandidate() public {
