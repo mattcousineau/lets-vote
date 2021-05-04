@@ -4,6 +4,6 @@ a dapp for voting where all of the votes and candidate registration happens on c
 # dependencies
 setup hardhat and all dependencies: https://hardhat.org/tutorial/
 
-# mocha test suite
+# chai test suite
 run `npx hardhat test`
 
