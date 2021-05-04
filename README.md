@@ -1,6 +1,9 @@
 # lets-vote
 a dapp for voting where all of the votes and candidate registration happens on chain.
 
-#test suite
+# dependencies
+setup hardhat and all dependencies: https://hardhat.org/tutorial/
+
+# mocha test suite
 run `npx hardhat test`
 
