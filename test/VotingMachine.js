@@ -24,8 +24,9 @@ describe("Voting", function () {
   });
 
   describe("Voting Mechanics", function () {
-    it("Should allow a new election", async function () {
-        //TODO:
+    it("Should allow a new election and increase election count by 1", async function () {
+        await hardhatVotingMachine.registerNewElection("Test1", 1, 1);
+        expect(await hardhatVotingMachine.getActiveElectionCount()).to.equal(2);
     });
     it("Should prevent a duplicate election", async function () {
         //TODO:
@@ -43,6 +44,9 @@ describe("Voting", function () {
         //TODO:
     });
     it("Should prevent a vote if the candidate is invalid", async function () {
+        //TODO:
+    });
+    it("Should prevent a vote if the election is over", async function () {
         //TODO:
     });
     it("Should cast a vote and increment candidate voteCount by 1", async function () {

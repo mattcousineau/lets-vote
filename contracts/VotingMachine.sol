@@ -12,15 +12,21 @@ contract VotingMachine is VotingHelper {
 
     struct Election {
         string name;
-        uint256 id;
         uint256 registrationDeadline;
         uint256 electionDeadline;
-        Candidate[] candidates;
+        //Candidate[] candidates;
     }
 
+    event NewElectionCreated(
+        uint256 electionId,
+        string name,
+        uint256 registrationDeadline,
+        uint256 electionDeadline
+    );
+
     Election[] public elections;
+
     uint256 voteCount = 1;
-    // An address type variable is used to store ethereum accounts.
     address public owner;
 
     /**
@@ -33,11 +39,14 @@ contract VotingMachine is VotingHelper {
     }
 
     //Anyone can start an election with: (registration period, voting period)
-    function registerNewElection(uint256 registrationDays, uint256 votingDays)
-        public
-    {
-        //now + registrationDays
-        //now + registrationDays + votingDays
+    function registerNewElection(
+        string memory name,
+        uint256 registrationDays,
+        uint256 votingDays
+    ) public {
+        elections.push(Election(name, registrationDays, votingDays));
+        uint256 electionId = elections.length - 1;
+        emit NewElectionCreated(electionId, name, registrationDays, votingDays);
     }
 
     //Anyone can sign up as a candidate during the registration period
@@ -47,7 +56,7 @@ contract VotingMachine is VotingHelper {
     }
 
     //Allow anyone to vote ONCE during the voting period
-    function vote() public {
+    function vote() public pure {
         //if the user hasn't voted
         require(!_hasVoted());
         //allow them to voteForCandidate(msg.sender, candidate)
@@ -56,5 +65,9 @@ contract VotingMachine is VotingHelper {
 
     function getVotesForCandidate() public view returns (uint256) {
         return voteCount;
+    }
+
+    function getActiveElectionCount() public view returns (uint256) {
+        return elections.length;
     }
 }
