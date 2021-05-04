@@ -50,7 +50,7 @@ contract VotingMachine is VotingHelper {
     }
 
     //Anyone can sign up as a candidate during the registration period
-    function registerNewCandidate() public {
+    function registerNewCandidate(string memory name) public {
         //make sure candidate isn't already registered
         //require(!_alreadyRegistered());
     }
@@ -69,5 +69,13 @@ contract VotingMachine is VotingHelper {
 
     function getActiveElectionCount() public view returns (uint256) {
         return elections.length;
+    }
+
+    function getRegisteredCandidatesForElectionCount()
+        public
+        view
+        returns (uint256)
+    {
+        //TODO: return  count
     }
 }

@@ -1,7 +1,7 @@
 // We import Chai to use its asserting functions here.
 const { expect } = require("chai");
 
-describe("Voting", function () {
+describe("VotingMaching - Let's Vote!", function () {
 
   let VotingMachine;
   let hardhatVotingMachine;
@@ -23,20 +23,27 @@ describe("Voting", function () {
     });
   });
 
-  describe("Voting Mechanics", function () {
+  describe("Election Mechanics", function () {
     it("Should allow a new election and increase election count by 1", async function () {
-        await hardhatVotingMachine.registerNewElection("Test1", 1, 1);
-        expect(await hardhatVotingMachine.getActiveElectionCount()).to.equal(2);
+        await hardhatVotingMachine.registerNewElection("TestElection1", 1, 1);
+        expect(await hardhatVotingMachine.getActiveElectionCount()).to.equal(1);
     });
     it("Should prevent a duplicate election", async function () {
         //TODO:
     });
+  });
+
+  describe("Registration Mechanics", function () {
     it("Should allow the registration of a new candidate for this election", async function () {
-        //TODO:
+        await hardhatVotingMachine.registerNewCandidate("TestCandidate1");
+        expect(await hardhatVotingMachine.getRegisteredCandidatesForElectionCount()).to.equal(1);
     });
     it("Should prevent the registration of an existing candidate for this election", async function () {
         //TODO:
     });
+  });
+
+  describe("Voting Mechanics", function () {
     it("Should allow a vote if sender has NOT voted", async function () {
         //TODO:
     });
