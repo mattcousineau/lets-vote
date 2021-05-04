@@ -1,7 +1,7 @@
 // We import Chai to use its asserting functions here.
 const { expect } = require("chai");
 
-describe("VotingMaching - Let's Vote!", function () {
+describe("VotingMachine - Let's Vote!", function () {
 
   let VotingMachine;
   let hardhatVotingMachine;
