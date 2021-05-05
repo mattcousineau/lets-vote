@@ -40,6 +40,12 @@ contract VotingMachine is VotingHelper {
         owner = msg.sender;
     }
 
+    // determine if user has already voted and prevent from voting again
+    function _hasVoted() internal pure returns (bool) {
+        //TODO:
+        return false;
+    }
+
     //Anyone can start an election with: (registration period, voting period)
     function registerNewElection(
         string memory name,
@@ -58,14 +64,20 @@ contract VotingMachine is VotingHelper {
     }
 
     //Allow anyone to vote ONCE during the voting period
-    function vote() public pure {
+    function vote(uint256 _electionId, uint256 _candidateId) public {
         require(!_hasVoted());
-        //allow them to voteForCandidate(msg.sender, candidate)
-        //flag voter for having voted in this election
+        Candidate storage candidate = candidates[_candidateId];
+        candidate.voteCount++;
     }
 
-    function getVotesForCandidate() public view returns (uint256) {
-        return voteCount;
+    function getVotesForCandidate(uint256 _electionId, uint256 _candidateId)
+        public
+        view
+        returns (uint256)
+    {
+        Election storage election = elections[_electionId];
+        Candidate storage candidate = candidates[_candidateId];
+        return candidate.voteCount;
     }
 
     function getActiveElectionCount() public view returns (uint256) {

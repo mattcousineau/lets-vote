@@ -40,13 +40,19 @@ describe("VotingMachine - Let's Vote!", function () {
         expect(await hardhatVotingMachine.getRegisteredCandidatesForElectionCount(1)).to.equal(1);
     });
     it("Should prevent the registration of an existing candidate for this election", async function () {
-        //TODO:
+      await hardhatVotingMachine.registerNewElection("TestElection2", 1, 1);
+      await hardhatVotingMachine.registerNewCandidate(123);
+      await hardhatVotingMachine.registerNewCandidate(123);
+      expect(await hardhatVotingMachine.getRegisteredCandidatesForElectionCount(123)).to.equal(2);
     });
   });
 
   describe("Voting Mechanics", function () {
     it("Should allow a vote if sender has NOT voted", async function () {
-        //TODO:
+      await hardhatVotingMachine.registerNewElection("TestElection2", 1, 1);
+      await hardhatVotingMachine.registerNewCandidate(1);
+      await hardhatVotingMachine.vote(0,0);
+      expect(await hardhatVotingMachine.getVotesForCandidate(0,0)).to.equal(1);
     });
     it("Should prevent a vote if sender HAS voted", async function () {
         //TODO:
@@ -58,8 +64,10 @@ describe("VotingMachine - Let's Vote!", function () {
         //TODO:
     });
     it("Should cast a vote and increment candidate voteCount by 1", async function () {
-        await hardhatVotingMachine.vote();
-        expect(await hardhatVotingMachine.getVotesForCandidate()).to.equal(1);
+        await hardhatVotingMachine.registerNewElection("TestElection2", 1, 1);
+        await hardhatVotingMachine.registerNewCandidate(1);
+        await hardhatVotingMachine.vote(0,0);
+        expect(await hardhatVotingMachine.getVotesForCandidate(0,0)).to.equal(1);
     });
   });
 });
