@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 
 contract VotingHelper {
     // determine if user has already voted and prevent from voting again
@@ -8,7 +8,11 @@ contract VotingHelper {
         return false;
     }
 
-    function _alreadyRegistered() internal pure returns (bool) {
+    function _alreadyRegistered(address candidateAddress)
+        internal
+        pure
+        returns (bool)
+    {
         //TODO:
         return false;
     }

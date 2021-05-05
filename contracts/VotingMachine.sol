@@ -1,20 +1,21 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 
 import "./VotingHelper.sol";
+import "hardhat/console.sol";
 
 contract VotingMachine is VotingHelper {
-    struct Candidate {
-        string name;
-        uint256 id;
-        uint256 voteCount;
-    }
-
     struct Election {
         string name;
         uint256 registrationDeadline;
         uint256 electionDeadline;
-        //Candidate[] candidates;
+    }
+
+    struct Candidate {
+        string name;
+        address candidateId;
+        uint256 electionId;
+        uint256 voteCount;
     }
 
     event NewElectionCreated(
@@ -24,6 +25,7 @@ contract VotingMachine is VotingHelper {
         uint256 electionDeadline
     );
 
+    Candidate[] public candidates;
     Election[] public elections;
 
     uint256 voteCount = 1;
@@ -34,7 +36,7 @@ contract VotingMachine is VotingHelper {
      *
      * The `constructor` is executed only once when the contract is created.
      */
-    constructor() public {
+    constructor() {
         owner = msg.sender;
     }
 
@@ -50,14 +52,13 @@ contract VotingMachine is VotingHelper {
     }
 
     //Anyone can sign up as a candidate during the registration period
-    function registerNewCandidate(string memory name) public {
-        //make sure candidate isn't already registered
-        //require(!_alreadyRegistered());
+    function registerNewCandidate(uint256 electionId) public {
+        require(!_alreadyRegistered(msg.sender));
+        candidates.push(Candidate("Matt", msg.sender, electionId, 0));
     }
 
     //Allow anyone to vote ONCE during the voting period
     function vote() public pure {
-        //if the user hasn't voted
         require(!_hasVoted());
         //allow them to voteForCandidate(msg.sender, candidate)
         //flag voter for having voted in this election
@@ -71,11 +72,18 @@ contract VotingMachine is VotingHelper {
         return elections.length;
     }
 
-    function getRegisteredCandidatesForElectionCount()
+    function getRegisteredCandidatesForElectionCount(uint256 electionId)
         public
         view
         returns (uint256)
     {
-        //TODO: return  count
+        uint256 candidateCount = 0;
+
+        for (uint256 i = 0; i < candidates.length; i++) {
+            if (candidates[i].electionId == electionId) {
+                candidateCount++;
+            }
+        }
+        return candidateCount;
     }
 }

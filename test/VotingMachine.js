@@ -35,8 +35,9 @@ describe("VotingMachine - Let's Vote!", function () {
 
   describe("Registration Mechanics", function () {
     it("Should allow the registration of a new candidate for this election", async function () {
-        await hardhatVotingMachine.registerNewCandidate("TestCandidate1");
-        expect(await hardhatVotingMachine.getRegisteredCandidatesForElectionCount()).to.equal(1);
+        await hardhatVotingMachine.registerNewElection("TestElection1", 1, 1);
+        await hardhatVotingMachine.registerNewCandidate(1);
+        expect(await hardhatVotingMachine.getRegisteredCandidatesForElectionCount(1)).to.equal(1);
     });
     it("Should prevent the registration of an existing candidate for this election", async function () {
         //TODO:
