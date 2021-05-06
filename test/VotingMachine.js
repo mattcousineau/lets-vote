@@ -42,10 +42,10 @@ describe("VotingMachine - Let's Vote!", function () {
         expect(await hardhatVotingMachine.getRegisteredCandidatesForElectionCount(1)).to.equal(1);
     });
     it("Should prevent the registration of an existing candidate for this election", async function () {
-      // await hardhatVotingMachine.registerNewElection("TestElection2", 1, 1);
-      // await hardhatVotingMachine.registerNewCandidate(123);
-      // await hardhatVotingMachine.registerNewCandidate(123);
-      // expect(await hardhatVotingMachine.getRegisteredCandidatesForElectionCount(123)).to.equal(2);
+      await hardhatVotingMachine.registerNewElection(testElection, 1, 1);
+      await hardhatVotingMachine.registerNewCandidate(123, testCandidate);
+      await hardhatVotingMachine.registerNewCandidate(123, testCandidate);
+      expect(await hardhatVotingMachine.getRegisteredCandidatesForElectionCount(123)).to.equal(2);
     });
   });
 

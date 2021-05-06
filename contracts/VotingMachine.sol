@@ -7,7 +7,7 @@ import "hardhat/console.sol";
 contract VotingMachine is VotingHelper {
     struct Candidate {
         string name;
-        //address candidateId;
+        address candidateId;
         uint256 voteCount;
     }
 
@@ -16,6 +16,7 @@ contract VotingMachine is VotingHelper {
         uint256 registrationDeadline;
         uint256 electionDeadline;
         uint256 numberofCandidates;
+        mapping(address => bool) voteSubmitted;
         mapping(uint256 => Candidate) candidates;
     }
 
@@ -42,9 +43,29 @@ contract VotingMachine is VotingHelper {
     }
 
     // determine if user has already voted and prevent from voting again
-    function _hasVoted(uint256 _electionId) internal pure returns (bool) {
-        //TODO:
-        return false;
+    function _hasVoted(uint256 _electionId) internal view returns (bool) {
+        Election storage election = elections[_electionId];
+        console.log("VOTE SUBMITTED?", election.voteSubmitted[msg.sender]);
+
+        return election.voteSubmitted[msg.sender];
+    }
+
+    function _alreadyRegistered(uint256 _electionId)
+        internal
+        view
+        returns (bool)
+    {
+        //TODO:  this just seems...ugly.. but it works for now
+        Election storage election = elections[_electionId];
+        if (election.numberofCandidates == 0) {
+            return false;
+        }
+        for (uint256 i = 0; i < election.numberofCandidates; i++) {
+            if (election.candidates[i].candidateId == msg.sender) {
+                return false;
+            }
+        }
+        return true;
     }
 
     //Anyone can start an election with: (registration period, voting period)
@@ -56,7 +77,7 @@ contract VotingMachine is VotingHelper {
         electionId = numberOfElections++;
         Election storage election = elections[electionId];
         election.name = name;
-        //TODO: this can be more elegant - learn about solidity date/time!
+        //TODO: this can be more elegant - learn about Solidity date/time!
         election.registrationDeadline = block.timestamp + registrationDays;
         election.electionDeadline =
             block.timestamp +
@@ -74,10 +95,11 @@ contract VotingMachine is VotingHelper {
     function registerNewCandidate(uint256 electionId, string memory name)
         public
     {
-        require(!_alreadyRegistered(msg.sender));
+        require(!_alreadyRegistered(electionId));
         Election storage election = elections[electionId];
         election.candidates[election.numberofCandidates++] = Candidate({
             name: name,
+            candidateId: msg.sender,
             voteCount: 0
         });
     }
@@ -85,9 +107,9 @@ contract VotingMachine is VotingHelper {
     //Allow anyone to vote ONCE during the voting period
     function vote(uint256 _electionId, uint256 _candidateId) public {
         require(!_hasVoted(_electionId));
-        Election storage election = elections[_electionId];
-        Candidate storage candidate = election.candidates[_candidateId];
-        candidate.voteCount++;
+        //not sure if this is bad practice... but.. ONE LINE!
+        elections[_electionId].candidates[_candidateId].voteCount++;
+        elections[_electionId].voteSubmitted[msg.sender] = true;
     }
 
     function getVotesForCandidate(uint256 _electionId, uint256 _candidateId)
@@ -95,9 +117,7 @@ contract VotingMachine is VotingHelper {
         view
         returns (uint256)
     {
-        Election storage election = elections[_electionId];
-        Candidate storage candidate = election.candidates[_candidateId];
-        return candidate.voteCount;
+        return elections[_electionId].candidates[_candidateId].voteCount;
     }
 
     function getActiveElectionCount() public view returns (uint256) {
@@ -109,7 +129,6 @@ contract VotingMachine is VotingHelper {
         view
         returns (uint256)
     {
-        Election storage election = elections[electionId];
-        return election.numberofCandidates;
+        return elections[electionId].numberofCandidates;
     }
 }
