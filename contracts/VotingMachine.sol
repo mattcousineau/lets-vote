@@ -30,7 +30,6 @@ contract VotingMachine is VotingHelper {
         uint256 electionDeadline
     );
 
-    uint256 voteCount = 1;
     address public owner;
 
     /**
@@ -45,8 +44,6 @@ contract VotingMachine is VotingHelper {
     // determine if user has already voted and prevent from voting again
     function _hasVoted(uint256 _electionId) internal view returns (bool) {
         Election storage election = elections[_electionId];
-        console.log("VOTE SUBMITTED?", election.voteSubmitted[msg.sender]);
-
         return election.voteSubmitted[msg.sender];
     }
 
