@@ -18,6 +18,7 @@ contract VotingMachine is VotingHelper {
         uint256 numberofCandidates;
         mapping(address => bool) voteSubmitted;
         mapping(uint256 => Candidate) candidates;
+        address registrarId;
     }
 
     uint256 numberOfElections;
@@ -41,45 +42,27 @@ contract VotingMachine is VotingHelper {
         owner = msg.sender;
     }
 
-    // determine if user has already voted and prevent from voting again
-    function _hasVoted(uint256 _electionId) internal view returns (bool) {
-        Election storage election = elections[_electionId];
-        return election.voteSubmitted[msg.sender];
-    }
-
-    function _alreadyRegistered(uint256 _electionId)
-        internal
-        view
-        returns (bool)
-    {
-        //TODO:  this just seems...ugly.. but it works for now
-        Election storage election = elections[_electionId];
-        if (election.numberofCandidates == 0) {
-            return false;
-        }
-        for (uint256 i = 0; i < election.numberofCandidates; i++) {
-            if (election.candidates[i].candidateId == msg.sender) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     //Anyone can start an election with: (registration period, voting period)
     function registerNewElection(
         string memory name,
         uint256 registrationDays,
         uint256 votingDays
     ) public returns (uint256 electionId) {
+        require(
+            !_electionAlreadyRegistered(),
+            "User is already a registrar of an active election"
+        );
         electionId = numberOfElections++;
         Election storage election = elections[electionId];
         election.name = name;
-        //TODO: this can be more elegant - learn about Solidity date/time!
-        election.registrationDeadline = block.timestamp + registrationDays;
-        election.electionDeadline =
+        election.registrarId = msg.sender;
+        //TODO: this can be more elegant - learn about Solidity blocktime!  :(
+        election.registrationDeadline =
             block.timestamp +
-            registrationDays +
-            votingDays;
+            (registrationDays * 1 days);
+        election.electionDeadline =
+            election.registrationDeadline +
+            (votingDays * 1 days);
         emit NewElectionCreated(
             electionId,
             name,
@@ -92,7 +75,10 @@ contract VotingMachine is VotingHelper {
     function registerNewCandidate(uint256 electionId, string memory name)
         public
     {
-        require(!_alreadyRegistered(electionId));
+        require(
+            !_candidateAlreadyRegistered(electionId),
+            "User is already registered"
+        );
         Election storage election = elections[electionId];
         election.candidates[election.numberofCandidates++] = Candidate({
             name: name,
@@ -103,7 +89,7 @@ contract VotingMachine is VotingHelper {
 
     //Allow anyone to vote ONCE during the voting period
     function vote(uint256 _electionId, uint256 _candidateId) public {
-        require(!_hasVoted(_electionId));
+        require(!_hasVoted(_electionId), "User has already voted");
         //not sure if this is bad practice... but.. ONE LINE!
         elections[_electionId].candidates[_candidateId].voteCount++;
         elections[_electionId].voteSubmitted[msg.sender] = true;
@@ -127,5 +113,38 @@ contract VotingMachine is VotingHelper {
         returns (uint256)
     {
         return elections[electionId].numberofCandidates;
+    }
+
+    function _electionAlreadyRegistered() internal view returns (bool) {
+        for (uint256 i = 0; i < numberOfElections; i++) {
+            if (elections[i].registrarId == msg.sender) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function _candidateAlreadyRegistered(uint256 _electionId)
+        internal
+        view
+        returns (bool)
+    {
+        //TODO:  this just seems...ugly.. but it works for now
+        Election storage election = elections[_electionId];
+        if (election.numberofCandidates == 0) {
+            return false;
+        }
+        for (uint256 i = 0; i < election.numberofCandidates; i++) {
+            if (election.candidates[i].candidateId == msg.sender) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function _hasVoted(uint256 _electionId) internal view returns (bool) {
+        Election storage election = elections[_electionId];
+        return election.voteSubmitted[msg.sender];
     }
 }

@@ -1,5 +1,11 @@
-// We import Chai to use its asserting functions here.
-const { expect } = require("chai");
+var chai = require("chai");
+var chaiAsPromised = require("chai-as-promised");
+
+chai.use(chaiAsPromised);
+
+var expect = chai.expect;
+var assert = chai.assert;
+chai.should();
 
 describe("VotingMachine - Let's Vote!", function () {
 
@@ -31,7 +37,8 @@ describe("VotingMachine - Let's Vote!", function () {
         expect(await hardhatVotingMachine.getActiveElectionCount()).to.equal(1);
     });
     it("Should prevent a duplicate election", async function () {
-        //TODO:
+        await hardhatVotingMachine.registerNewElection(testElection, 1, 1);
+        await hardhatVotingMachine.registerNewElection(testElection, 1, 1).should.be.rejectedWith(Error, "VM Exception while processing transaction: revert User is already a registrar of an active election");
     });
   });
 
@@ -51,24 +58,28 @@ describe("VotingMachine - Let's Vote!", function () {
 
   describe("Voting Mechanics", function () {
     it("Should allow a vote if sender has NOT voted", async function () {
-      await hardhatVotingMachine.registerNewElection("TestElection2", 1, 1);
+      await hardhatVotingMachine.registerNewElection(testElection, 1, 1);
       await hardhatVotingMachine.registerNewCandidate(1, testCandidate);
-      await hardhatVotingMachine.vote(0,0);
+      await hardhatVotingMachine.vote(0,0).should.be.fulfilled;
       expect(await hardhatVotingMachine.getVotesForCandidate(0,0)).to.equal(1);
     });
     it("Should prevent a vote if sender HAS voted", async function () {
-        //TODO:
+      await hardhatVotingMachine.registerNewElection(testElection, 1, 1);
+      await hardhatVotingMachine.registerNewCandidate(1, testCandidate);
+      await hardhatVotingMachine.vote(0,0);
+      await hardhatVotingMachine.vote(0,0).should.be.rejectedWith(Error);
     });
     it("Should prevent a vote if the candidate is invalid", async function () {
+      await hardhatVotingMachine.registerNewElection(testElection, 1, 1);
         //TODO:
     });
     it("Should prevent a vote if the election is over", async function () {
         //TODO:
     });
     it("Should cast a vote and increment candidate voteCount by 1", async function () {
-        await hardhatVotingMachine.registerNewElection("TestElection2", 1, 1);
-        await hardhatVotingMachine.registerNewCandidate(1, "Matt Test Candidate");
-        await hardhatVotingMachine.vote(0,0);
+        await hardhatVotingMachine.registerNewElection(testElection, 1, 1);
+        await hardhatVotingMachine.registerNewCandidate(1, testCandidate);
+        await hardhatVotingMachine.vote(0,0).should.be.fulfilled;
         expect(await hardhatVotingMachine.getVotesForCandidate(0,0)).to.equal(1);
     });
   });
