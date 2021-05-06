@@ -5,18 +5,22 @@ import "./VotingHelper.sol";
 import "hardhat/console.sol";
 
 contract VotingMachine is VotingHelper {
+    struct Candidate {
+        string name;
+        //address candidateId;
+        uint256 voteCount;
+    }
+
     struct Election {
         string name;
         uint256 registrationDeadline;
         uint256 electionDeadline;
+        uint256 numberofCandidates;
+        mapping(uint256 => Candidate) candidates;
     }
 
-    struct Candidate {
-        string name;
-        address candidateId;
-        uint256 electionId;
-        uint256 voteCount;
-    }
+    uint256 numberOfElections;
+    mapping(uint256 => Election) public elections;
 
     event NewElectionCreated(
         uint256 electionId,
@@ -24,9 +28,6 @@ contract VotingMachine is VotingHelper {
         uint256 registrationDeadline,
         uint256 electionDeadline
     );
-
-    Candidate[] public candidates;
-    Election[] public elections;
 
     uint256 voteCount = 1;
     address public owner;
@@ -41,7 +42,7 @@ contract VotingMachine is VotingHelper {
     }
 
     // determine if user has already voted and prevent from voting again
-    function _hasVoted() internal pure returns (bool) {
+    function _hasVoted(uint256 _electionId) internal pure returns (bool) {
         //TODO:
         return false;
     }
@@ -51,22 +52,41 @@ contract VotingMachine is VotingHelper {
         string memory name,
         uint256 registrationDays,
         uint256 votingDays
-    ) public {
-        elections.push(Election(name, registrationDays, votingDays));
-        uint256 electionId = elections.length - 1;
-        emit NewElectionCreated(electionId, name, registrationDays, votingDays);
+    ) public returns (uint256 electionId) {
+        electionId = numberOfElections++;
+        Election storage election = elections[electionId];
+        election.name = name;
+        //TODO: this can be more elegant - learn about solidity date/time!
+        election.registrationDeadline = block.timestamp + registrationDays;
+        election.electionDeadline =
+            block.timestamp +
+            registrationDays +
+            votingDays;
+        emit NewElectionCreated(
+            electionId,
+            name,
+            election.registrationDeadline,
+            election.electionDeadline
+        );
     }
 
     //Anyone can sign up as a candidate during the registration period
-    function registerNewCandidate(uint256 electionId) public {
+    function registerNewCandidate(uint256 electionId, string memory name)
+        public
+    {
         require(!_alreadyRegistered(msg.sender));
-        candidates.push(Candidate("Matt", msg.sender, electionId, 0));
+        Election storage election = elections[electionId];
+        election.candidates[election.numberofCandidates++] = Candidate({
+            name: name,
+            voteCount: 0
+        });
     }
 
     //Allow anyone to vote ONCE during the voting period
     function vote(uint256 _electionId, uint256 _candidateId) public {
-        require(!_hasVoted());
-        Candidate storage candidate = candidates[_candidateId];
+        require(!_hasVoted(_electionId));
+        Election storage election = elections[_electionId];
+        Candidate storage candidate = election.candidates[_candidateId];
         candidate.voteCount++;
     }
 
@@ -76,12 +96,12 @@ contract VotingMachine is VotingHelper {
         returns (uint256)
     {
         Election storage election = elections[_electionId];
-        Candidate storage candidate = candidates[_candidateId];
+        Candidate storage candidate = election.candidates[_candidateId];
         return candidate.voteCount;
     }
 
     function getActiveElectionCount() public view returns (uint256) {
-        return elections.length;
+        return numberOfElections;
     }
 
     function getRegisteredCandidatesForElectionCount(uint256 electionId)
@@ -89,13 +109,7 @@ contract VotingMachine is VotingHelper {
         view
         returns (uint256)
     {
-        uint256 candidateCount = 0;
-
-        for (uint256 i = 0; i < candidates.length; i++) {
-            if (candidates[i].electionId == electionId) {
-                candidateCount++;
-            }
-        }
-        return candidateCount;
+        Election storage election = elections[electionId];
+        return election.numberofCandidates;
     }
 }
