@@ -8,6 +8,8 @@
     "ethers": "^5.1.4"
   },
   "dependencies": {
-    "chai-as-promised": "^7.1.1"
+    "chai-as-promised": "^7.1.1",
+    "create-react-app": "^4.0.3",
+    "truffle": "^5.3.4"
   }
 }
